@@ -1,0 +1,175 @@
+﻿@model TaxCalculator.Models.Tax
+
+@{
+    ViewBag.Title = "Tax Calculator";
+}
+
+
+<h1 class="mt-5">Tax calculator</h1>
+<p>
+    The gizmo below will tell you what your take home pay will be (and how much you're shelling out in tax) for the 2020-2021 tax year. There will also be a chart letting you know where your money might be spent by the government (based on <a href="https://www.gov.uk/government/publications/how-public-spending-was-calculated-in-your-tax-summary/how-public-spending-was-calculated-in-your-tax-summary">PESA Public Expenditure Data for 2019-20</a>).
+
+    <br /><br />
+
+    Please note that the calculator is missing certain features, such as student loan payments and tax allowances, and you may be receiving taxable benefits that will affect your take home pay.
+</p>
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post))
+{
+    //Helps protect against CSRF (cross site request forgery) attacks
+    @Html.AntiForgeryToken();
+
+    @Html.ValidationSummary()
+
+    <div class="form-group row gross-income-input">
+        <label for="gross-earnings" class="col-lg-3 text-right">Annual Gross Income</label>
+        @Html.EditorFor(m => m.GrossEarnings, new { @class = "form-control col-lg-9" })
+    </div>
+
+    <input id="income-submit-btn" type="submit" value="Submit" class="btn btn-primary mt-3" />
+}
+
+@if (@ViewBag.Display == true)
+{
+<div class="container mt-5">
+    <div class="row">
+        <table class="table table-striped table-hover table-bordered col-md-8">
+            <caption>Tax and national insurance details for your income</caption>
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col"></th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td scope="row">Gross income</td>
+                    <td>@Html.DisplayFor(x => x.GrossEarnings)</td>
+                </tr>
+                <tr>
+                    <td scope="row">Income tax payable</td>
+                    <td>@Html.DisplayFor(x => x.IncomeTax)</td>
+                </tr>
+                <tr>
+                    <td scope="row">National insurance contributions payable</td>
+                    <td>@Html.DisplayFor(x => x.NIC)</td>
+                </tr>
+                <tr>
+                    <td scope="row">Take home pay</td>
+                    <td>@Html.DisplayFor(x => x.NetEarnings)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <figure class="text-center mt-5">
+        <figcaption>How much of your pay you are left with after tax</figcaption>
+        <canvas id="income-chart"></canvas>
+    </figure>
+    <figure id="bar-chart" class="text-center mt-5">
+        <figcaption>Where your tax money might be spent</figcaption>
+        <canvas id="spending-chart"></canvas>
+    </figure>
+</div>
+
+<script>
+    var ct1 = document.getElementById('income-chart');
+    var myChart1 = new Chart(ct1, {
+        type: 'pie',
+        data: {
+            labels: ['Take home pay', 'Income tax payable', 'National insurance contributions payable'],
+            datasets: [{
+                label: 'Your pay',
+                data: [@ViewBag.TaxInfo.NetEarnings, @ViewBag.TaxInfo.IncomeTax, @ViewBag.TaxInfo.NIC],
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.2)',
+                    'rgba(54, 162, 235, 0.2)',
+                    'rgba(255, 206, 86, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ],
+            borderWidth: 1
+                }]
+            },
+            options: {
+                responsiveAnimationDuration: 1500,
+                maintainAspectRatio: false
+                }
+            });
+
+    var ct2 = document.getElementById('spending-chart');
+    var myChart2 = new Chart(ct2, {
+        type: 'bar',
+        data: {
+            labels: ['Welfare (Excluding state pensions)', 'Health', 'State Pensions', 'Education', 'National Debt Interest', 'Defence', 'Transport', 'Public Order & Safety', 'Business & Industry', 'Government Administration', 'Housing and utilities (e.g. street lights)', 'Culture (e.g. sports, libraries, museums)', 'Environment', 'Overseas Aid', 'UK Contributions to EU budget'],
+            datasets: [{
+                label: 'How much of your money was spent on each category',
+                data: [@ViewBag.Spending.Welfare, @ViewBag.Spending.Health, @ViewBag.Spending.StatePension, @ViewBag.Spending.Education, @ViewBag.Spending.NationalDebtInterest, @ViewBag.Spending.Defence, @ViewBag.Spending.Transport, @ViewBag.Spending.PublicOrderAndSafety, @ViewBag.Spending.BusinessAndIndustry, @ViewBag.Spending.GovernmentAdministration, @ViewBag.Spending.HousingAndUtilities, @ViewBag.Spending.Culture, @ViewBag.Spending.Environment, @ViewBag.Spending.OverseasAid, @ViewBag.Spending.EU],
+                backgroundColor: [
+                    'rgba(244, 67, 54, 0.2)',
+                    'rgba(233, 30, 99, 0.2)',
+                    'rgba(156, 39, 176, 0.2)',
+                    'rgba(63, 81, 181, 0.2)',
+                    'rgba(3, 169, 244, 0.2)',
+                    'rgba(0, 188, 212, 0.2)',
+                    'rgba(0, 150, 136, 0.2)',
+                    'rgba(76, 175, 80, 0.2)',
+                    'rgba(139, 195, 74, 0.2)',
+                    'rgba(205, 220, 57, 0.2)',
+                    'rgba(255, 235, 59, 0.2)',
+                    'rgba(255, 152, 0, 0.2)',
+                    'rgba(255, 87, 34, 0.2)',
+                    'rgba(121, 85, 72, 0.2)',
+                    'rgba(96, 125, 139, 0.2)'
+                ],
+                borderColor: [
+                    'rgba(244, 67, 54, 1)',
+                    'rgba(233, 30, 99, 1)',
+                    'rgba(156, 39, 176, 1)',
+                    'rgba(63, 81, 181, 1)',
+                    'rgba(3, 169, 244, 1)',
+                    'rgba(0, 188, 212, 1)',
+                    'rgba(0, 150, 136, 1)',
+                    'rgba(76, 175, 80, 1)',
+                    'rgba(139, 195, 74, 1)',
+                    'rgba(205, 220, 57, 1)',
+                    'rgba(255, 235, 59, 1)',
+                    'rgba(255, 152, 0, 1)',
+                    'rgba(255, 87, 34, 1)',
+                    'rgba(121, 85, 72, 1)',
+                    'rgba(96, 125, 139, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            legend: {
+                display: false
+            },
+            tooltips: {
+                callbacks: {
+                    label: function (tooltipItem) {
+                        return tooltipItem.yLabel;
+                    }
+                }
+            },
+            maintainAspectRatio: false,
+            scales: {
+                yAxes: [{
+                    scaleLabel: {
+                        display: true,
+                        labelString: 'Your tax and NIC (£)'
+                    },
+                    ticks: {
+                        beginAtZero: true
+                    }
+                }]
+            }
+        }
+    });
+</script>
+}
+

@@ -1,0 +1,51 @@
+﻿body {
+    font-family: 'Lato', sans-serif;
+    background-color: #f7f7f7;
+}
+
+.field-validation-error {
+    color: #f00;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #f00;
+    background-color: #fee;
+}
+
+.validation-summary-errors {
+    font-weight: bold;
+    color: #f00;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+#bar-chart {
+    height: 1000px;
+}
+
+#income-chart {
+    min-height: 250px;
+    max-height: 540px;
+}
+
+@media screen and (max-width: 992px) {
+    #bar-chart {
+        height: 500px;
+    }
+
+    .gross-income-input label {
+        text-align: center !important;
+        display: block;
+    }
+
+    .gross-income-input input, #income-submit-btn {
+        margin: 0 auto;
+        display: block;
+    }
+}
